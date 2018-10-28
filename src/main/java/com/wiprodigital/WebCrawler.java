@@ -2,8 +2,6 @@ package com.wiprodigital;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -17,37 +15,35 @@ public class WebCrawler {
     private Set<String> visitedLinks = new HashSet<>();
     private Set<String> pagesToVisit = new CopyOnWriteArraySet<>();
 
-    public void getPageContents(String URL) {
-        Set<String> childPages = new HashSet<>();
-        Set<String> externalUrls = new HashSet<>();
+    private LinksFinder linksFinder = new LinksFinder();
+    private ImagesFinder imagesFinder = new ImagesFinder();
+    private PageContentsPrinter pageContentsPrinter = new PageContentsPrinter();
 
-        if (!visitedLinks.contains(URL)) {
+    private void getPageContents(String url) {
+        PageContentsDto pageContentsDto = new PageContentsDto(url);
 
+        if (!visitedLinks.contains(url)) {
             try {
-                visitedLinks.add(URL);
-                Document document = Jsoup.connect(URL).get();
+                visitedLinks.add(url);
+                Document document = Jsoup.connect(url).get();
 
-                Set<String> allLinksOnPage = getLinksOnPage(document);
+                Set<String> allLinksOnPage = linksFinder.getLinksOnPage(document);
+
                 for(String link: allLinksOnPage) {
                     if(checkIfItIsNotExternalLink(link)){
-                        addToPagesToVisit(link);
-                        childPages.add(link);
+                        pagesToVisit.add(link);
+                        pageContentsDto.getChildUrls().add(link);
                     } else {
-                        externalUrls.add(link);
+                        pageContentsDto.getExternalUrls().add(link);
                     }
                 }
+
+                pageContentsDto.setImagesOnPage(imagesFinder.getImagesOnPage(document));
+
             } catch (IOException e) {
-                System.err.println("For '" + URL + "': " + e.getMessage());
+                System.err.println("For '" + url + "': " + e.getMessage());
             }
-            System.out.println("On page: " + URL + " there are URLs to child pages:");
-            for(String childUrl : childPages){
-                System.out.println("    child page: " + childUrl);
-            }
-            System.out.println("And external links to:");
-            for(String externalUrl : externalUrls){
-                System.out.println("    external link: " + externalUrl);
-            }
-            System.out.println("end of list for this page");
+            pageContentsPrinter.printContents(pageContentsDto);
         }
     }
 
@@ -58,19 +54,10 @@ public class WebCrawler {
         return false;
     }
 
-    private Set<String> getLinksOnPage(Document document){
-        Set<String> allLinksOnPage = new HashSet<>();
-        for(Element link: document.select("a[href]")){
-            allLinksOnPage.add(link.attr("abs:href"));
+    public void runSearchingForDefaultUrl(){
+        getPageContents(baseUrl);
+        for(String page : pagesToVisit){
+            getPageContents(page);
         }
-        for(Element link: document.select("input.linkURL")){
-            allLinksOnPage.add(link.attr("abs:value"));
-        }
-        return allLinksOnPage;
     }
-
-    private void addToPagesToVisit(String url){
-        pagesToVisit.add(url);
-    }
-
 }
