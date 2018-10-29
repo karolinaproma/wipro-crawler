@@ -1,6 +1,7 @@
 package com.wiprodigital;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.nio.file.Files;
@@ -10,6 +11,13 @@ import java.nio.file.Paths;
 public class PageContentsPrinterTest {
 
     private PageContentsPrinter contentsPrinter = new PageContentsPrinter();
+
+    @Before
+    public void executeBeforeTest() throws Exception{
+        String basePath = getBasePath();
+        String endPath = "/page_contents.txt";
+        Files.deleteIfExists(Paths.get(basePath, endPath));
+    }
 
     @Test
     public void fileWithContentShouldHaveSameText() throws Exception {
