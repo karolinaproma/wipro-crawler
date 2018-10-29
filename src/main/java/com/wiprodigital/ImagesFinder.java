@@ -3,7 +3,6 @@ package com.wiprodigital;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 
-import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -14,7 +13,7 @@ public class ImagesFinder {
     private static final String REGEX_FOR_IMAGES = "(http.*?(jpg|png|gif|bmp|img|jpeg|ico))";
 
     public Set<String> getImagesOnPage(Document document){
-        Set<String> imagesOnPage = new HashSet<>();
+        Set<String> imagesOnPage;
         Elements elementsWithImages = document.select("a[style]");
         Elements divElementsWithImages = document.select("div[style]");
         elementsWithImages.addAll(divElementsWithImages);
