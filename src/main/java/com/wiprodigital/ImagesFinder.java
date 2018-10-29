@@ -1,46 +1,43 @@
 package com.wiprodigital;
 
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import static java.util.stream.Collectors.toSet;
 
 public class ImagesFinder {
+
+    private static final String REGEX_FOR_IMAGES = "(http.*?(jpg|png|gif|bmp|img|jpeg|ico))";
 
     public Set<String> getImagesOnPage(Document document){
         Set<String> imagesOnPage = new HashSet<>();
         Elements elementsWithImages = document.select("a[style]");
         Elements divElementsWithImages = document.select("div[style]");
         elementsWithImages.addAll(divElementsWithImages);
+        imagesOnPage = elementsWithImages.stream()
+                .map(e -> findImageInString(e.attr("style")))
+                .filter(i -> !i.isEmpty())
+                .collect(toSet());
 
-        for(Element element : elementsWithImages){
-            String styleAttribute = element.attr("style");
-            String imageJpg = findImageInString(styleAttribute, "(http.*?jpg)");
-            if(!imageJpg.isEmpty()) imagesOnPage.add(imageJpg);
-            String imagePng = findImageInString(styleAttribute, "(http.*?png)");
-            if(!imagePng.isEmpty()) imagesOnPage.add(imagePng);
-            String imageGif = findImageInString(styleAttribute, "(http.*?gif)");
-            if(!imageGif.isEmpty()) imagesOnPage.add(imageGif);
-        }
+        Elements imagesFromSrc = document.select("img[src~=(?i)\\.(png|jpe?g|gif)]");
+        imagesOnPage.addAll(imagesFromSrc.stream()
+                .map(e -> e.attr("src"))
+                .filter(a -> !a.isEmpty())
+                .collect(toSet()));
 
-        Elements images = document.select("img[src~=(?i)\\.(png|jpe?g|gif)]");
-        for(Element element : images){
-            String srcAttribute = element.attr("src");
-            if(!srcAttribute.isEmpty()) imagesOnPage.add(srcAttribute);
-        }
         return imagesOnPage;
     }
 
-    private String findImageInString(String stringToCheck, String regex){
+    private static String findImageInString(String stringToCheck){
         String findedImage = "";
-        Matcher urlMatcher = Pattern.compile(regex).matcher(stringToCheck);
-        while (urlMatcher.find()) {
-            int matchStart = urlMatcher.start(1);
-            int matchEnd = urlMatcher.end();
+        Matcher imagesUrlMatcher = Pattern.compile(REGEX_FOR_IMAGES).matcher(stringToCheck);
+        if (imagesUrlMatcher.find()) {
+            int matchStart = imagesUrlMatcher.start(1);
+            int matchEnd = imagesUrlMatcher.end();
             findedImage = stringToCheck.substring(matchStart,matchEnd);
         }
         return findedImage;

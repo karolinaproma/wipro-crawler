@@ -7,7 +7,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class LinksFinder {
-
     public Set<String> getLinksOnPage(Document document){
         Set<String> allLinksOnPage = new HashSet<>();
         for(Element link: document.select("a[href]")){
