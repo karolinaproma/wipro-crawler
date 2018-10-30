@@ -1,22 +1,27 @@
 package com.wiprodigital;
 
+import static org.hamcrest.io.FileMatchers.*;
+
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class PageContentsPrinterTest {
 
+    private static final String FILE_PATH = "/page_contents.txt";
+
     private PageContentsPrinter contentsPrinter = new PageContentsPrinter();
 
     @Before
     public void executeBeforeTest() throws Exception{
         String basePath = getBasePath();
-        String endPath = "/page_contents.txt";
-        Files.deleteIfExists(Paths.get(basePath, endPath));
+        Files.deleteIfExists(Paths.get(basePath, FILE_PATH));
     }
 
     @Test
@@ -28,12 +33,11 @@ public class PageContentsPrinterTest {
         contentsPrinter.printContents(pageContent);
 
         String basePath = getBasePath();
-        String endPath = "/page_contents.txt";
+        File pageContentsFile = new File(basePath,FILE_PATH);
 
-        Assert.assertTrue(Files.exists(Paths.get(basePath, endPath)));
+        Assert.assertThat(pageContentsFile, anExistingFile());
 
-
-        String actualString = new String(Files.readAllBytes(Paths.get(basePath, endPath)));
+        String actualString = new String(Files.readAllBytes(Paths.get(basePath, FILE_PATH)));
 
         Assert.assertEquals(expectedString, actualString);
     }

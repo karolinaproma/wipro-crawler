@@ -1,8 +1,10 @@
 package com.wiprodigital;
 
+import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.Matchers.*;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.nio.file.Files;
@@ -20,7 +22,7 @@ public class LinksFinderTest {
 
         Set<String> findedLinks = linksFinder.getLinksOnPage(document);
 
-        Assert.assertEquals(4, findedLinks.size());
+        assertThat(findedLinks,hasSize(4));
     }
 
     @Test
@@ -30,6 +32,6 @@ public class LinksFinderTest {
 
         Set<String> findedLinks = linksFinder.getLinksOnPage(document);
 
-        Assert.assertEquals(0, findedLinks.size());
+        assertThat(findedLinks,hasSize(0));
     }
 }

@@ -6,7 +6,7 @@ import java.io.IOException;
 
 public class PageContentsPrinter {
 
-    private static final String FILENAME = "page_contents.txt";
+    private static final String FILE_NAME = "page_contents.txt";
 
     public void printContents(PageContent pageContent){
         String contentToPrint = pageContent.toString();
@@ -15,7 +15,7 @@ public class PageContentsPrinter {
     }
 
     private void writeToFile(String content){
-        try(BufferedWriter bw = new BufferedWriter(new FileWriter(FILENAME,true))){
+        try(BufferedWriter bw = new BufferedWriter(new FileWriter(FILE_NAME,true))){
             bw.write(content);
         } catch (IOException e) {
             e.printStackTrace();
